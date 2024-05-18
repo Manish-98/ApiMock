@@ -24,7 +24,7 @@ public abstract class SchemaExtractor {
                 responseCodeSchemas.put(responseCode, new PrimitiveSchema(Type.EMPTY));
             } else {
                 MediaType mediaType = content.getOrDefault(APPLICATION_JSON_VALUE, new MediaType());
-                responseCodeSchemas.put(responseCode, new SchemaUtils().from(mediaType.getSchema()));
+                responseCodeSchemas.put(responseCode, SchemaUtils.from(mediaType.getSchema()));
             }
         }));
         return responseCodeSchemas;

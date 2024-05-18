@@ -1,8 +1,13 @@
 package one.june.apimock.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import one.june.apimock.exception.MockNotFoundException;
+import one.june.apimock.generator.JsonGenerator;
+import one.june.apimock.model.HttpMethod;
 import one.june.apimock.model.MockRequest;
+import one.june.apimock.model.Schema;
 import one.june.apimock.parser.OpenApiParser;
 import one.june.apimock.repository.MockRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,6 +24,7 @@ import java.util.Objects;
 @Slf4j
 public class MockService {
     private final OpenApiParser parser;
+    private final JsonGenerator jsonGenerator;
     private final MockRequestRepository mockRequestRepository;
 
     public List<MockRequest> parseOpenApi(MultipartFile openApiDoc) {
@@ -47,5 +53,15 @@ public class MockService {
             log.error("Error parsing file {} due to {} ", filename, e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    public JsonNode mockGet(String path) throws MockNotFoundException {
+        log.info("Mocking GET request for {}", path);
+        MockRequest mockRequest = mockRequestRepository.findByHttpMethodAndPath(HttpMethod.GET, path)
+                .orElseThrow(MockNotFoundException::new);
+
+        Schema schema = mockRequest.getResponseCodeSchemas().get("200");
+
+        return jsonGenerator.generate(schema);
     }
 }

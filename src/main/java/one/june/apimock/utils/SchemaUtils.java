@@ -11,6 +11,7 @@ import one.june.apimock.model.PrimitiveSchema;
 import one.june.apimock.model.Schema;
 
 import java.util.HashMap;
+import java.util.Random;
 
 import static one.june.apimock.model.Type.BOOLEAN;
 import static one.june.apimock.model.Type.INTEGER;
@@ -20,7 +21,10 @@ import static one.june.apimock.model.Type.STRING;
 import static one.june.apimock.model.Type.UUID;
 
 public class SchemaUtils {
-    public Schema from(io.swagger.v3.oas.models.media.Schema<?> inputSchema) {
+    private static final Random random = new Random();
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    public static Schema from(io.swagger.v3.oas.models.media.Schema<?> inputSchema) {
         if (inputSchema instanceof StringSchema) {
             return new PrimitiveSchema(STRING);
         } else if (inputSchema instanceof BooleanSchema) {
@@ -41,5 +45,25 @@ public class SchemaUtils {
         }
 
         return new PrimitiveSchema(NULL);
+    }
+
+    public static Object generatePrimitiveData(PrimitiveSchema schema) {
+        return switch (schema.getType()) {
+            case STRING -> generateRandomString();
+            case BOOLEAN -> random.nextBoolean();
+            case NUMBER -> random.nextDouble();
+            case INTEGER -> random.nextInt();
+            case UUID -> java.util.UUID.randomUUID();
+            case NULL, EMPTY -> null;
+        };
+    }
+
+    private static String generateRandomString() {
+        StringBuilder sb = new StringBuilder(10);
+        for (int i = 0; i < 10; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(index));
+        }
+        return sb.toString();
     }
 }
