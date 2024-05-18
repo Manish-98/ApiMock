@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import one.june.apimock.model.MockRequest;
 import one.june.apimock.parser.OpenApiParser;
 import one.june.apimock.repository.MockRequestRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +31,15 @@ public class MockService {
             String filePath = file.getAbsolutePath();
             log.info("Received file {} for parsing with path {}.", filename, filePath);
             List<MockRequest> mockRequests = parser.parse(filePath);
-            return mockRequestRepository.saveAll(mockRequests);
+
+            return mockRequests.stream().parallel().map(mockRequest -> {
+                try {
+                    return mockRequestRepository.save(mockRequest);
+                } catch (DataIntegrityViolationException e) {
+                    log.error("Found duplicate mock requests {}", e.getMessage());
+                    return null;
+                }
+            }).filter(Objects::nonNull).toList();
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             log.error("Invalid file: {} due to {} ", filename, e.getMessage(), e);
             throw new RuntimeException(e);
