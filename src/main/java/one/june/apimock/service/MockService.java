@@ -11,6 +11,7 @@ import one.june.apimock.model.ResponseMappingRequest;
 import one.june.apimock.model.Schema;
 import one.june.apimock.parser.OpenApiParser;
 import one.june.apimock.repository.MockRequestRepository;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,14 +57,13 @@ public class MockService {
         }
     }
 
-    public JsonNode mockGet(String path) throws MockNotFoundException {
+    public Pair<String, JsonNode> mockGet(String path) throws MockNotFoundException {
         log.info("Mocking GET request for {}", path);
         MockRequest mockRequest = mockRequestRepository.findByHttpMethodAndPath(HttpMethod.GET, path)
                 .orElseThrow(MockNotFoundException::new);
+        Schema schema = mockRequest.getResponseCodeSchemas().get(mockRequest.getSelectedResponseCode());
 
-        Schema schema = mockRequest.getResponseCodeSchemas().get("200");
-
-        return jsonGenerator.generate(schema);
+        return Pair.of(mockRequest.getSelectedResponseCode(), jsonGenerator.generate(schema));
     }
 
     public List<ResponseMappingRequest> updateResponseCodeMapping(List<ResponseMappingRequest> responseMappingRequests) {

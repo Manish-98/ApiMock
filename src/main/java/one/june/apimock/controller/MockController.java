@@ -8,6 +8,7 @@ import one.june.apimock.exception.MockNotFoundException;
 import one.june.apimock.model.MockRequest;
 import one.june.apimock.model.ResponseMappingRequest;
 import one.june.apimock.service.MockService;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,8 +40,8 @@ public class MockController {
 
     @GetMapping("/**")
     public ResponseEntity<JsonNode> mockGet(HttpServletRequest request) throws MockNotFoundException {
-        JsonNode response = mockService.mockGet(request.getRequestURI());
-        return ResponseEntity.ok().body(response);
+        Pair<String, JsonNode> response = mockService.mockGet(request.getRequestURI());
+        return ResponseEntity.status(Integer.parseInt(response.getKey())).body(response.getValue());
     }
 
     @ExceptionHandler(MockNotFoundException.class)
