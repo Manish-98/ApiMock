@@ -7,6 +7,7 @@ import one.june.apimock.exception.MockNotFoundException;
 import one.june.apimock.generator.JsonGenerator;
 import one.june.apimock.model.HttpMethod;
 import one.june.apimock.model.MockRequest;
+import one.june.apimock.model.ResponseMappingRequest;
 import one.june.apimock.model.Schema;
 import one.june.apimock.parser.OpenApiParser;
 import one.june.apimock.repository.MockRequestRepository;
@@ -63,5 +64,25 @@ public class MockService {
         Schema schema = mockRequest.getResponseCodeSchemas().get("200");
 
         return jsonGenerator.generate(schema);
+    }
+
+    public List<ResponseMappingRequest> updateResponseCodeMapping(List<ResponseMappingRequest> responseMappingRequests) {
+        return responseMappingRequests.stream().peek(responseMappingRequest -> {
+            MockRequest mockRequest = mockRequestRepository.findByHttpMethodAndPath(
+                    responseMappingRequest.getHttpMethod(), responseMappingRequest.getPath()
+            ).orElse(null);
+
+            if (mockRequest != null) {
+                if (mockRequest.getResponseCodeSchemas().containsKey(responseMappingRequest.getResponseCode())) {
+                    mockRequest.setSelectedResponseCode(responseMappingRequest.getResponseCode());
+                    mockRequestRepository.save(mockRequest);
+                    responseMappingRequest.setStatus("Success");
+                } else {
+                    responseMappingRequest.setStatus("Invalid response code");
+                }
+            } else {
+                responseMappingRequest.setStatus("Mock request not found");
+            }
+        }).toList();
     }
 }
