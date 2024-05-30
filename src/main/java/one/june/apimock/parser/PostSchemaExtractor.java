@@ -8,20 +8,22 @@ import one.june.apimock.model.MockRequest;
 import one.june.apimock.model.Schema;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 public class PostSchemaExtractor extends SchemaExtractor {
     @Override
     public MockRequest extract(String path, PathItem pathItem) {
-        Operation post = pathItem.getPost();
-        if (post == null) return null;
+        Operation operation = pathItem.getPost();
+        if (operation == null) return null;
 
-        HashMap<String, Schema> responseCodeSchemas = getSchema(post);
+        List<String> pathTokens = getTokens(path, operation);
+        HashMap<String, Schema> responseCodeSchemas = getSchema(operation);
         Optional<String> responseCode = responseCodeSchemas.keySet().stream().findFirst();
 
         if (responseCode.isPresent())
-            return new MockRequest(path, HttpMethod.POST, responseCodeSchemas, responseCode.get());
+            return new MockRequest(path, HttpMethod.POST, pathTokens, responseCodeSchemas, responseCode.get());
 
         log.error("No mock response provided for {} {}", HttpMethod.POST, path);
         return null;

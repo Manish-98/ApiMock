@@ -47,6 +47,15 @@ public class SchemaUtils {
         return new PrimitiveSchema(NULL);
     }
 
+    public static String patternFrom(io.swagger.v3.oas.models.media.Schema<?> inputSchema) {
+        if (inputSchema instanceof StringSchema) return RegexPatterns.ALPHANUMERIC;
+        else if (inputSchema instanceof BooleanSchema) return RegexPatterns.BOOLEAN;
+        else if (inputSchema instanceof IntegerSchema) return RegexPatterns.INTEGER;
+        else if (inputSchema instanceof NumberSchema) return RegexPatterns.NUMBER;
+        else if (inputSchema instanceof UUIDSchema) return RegexPatterns.UUID;
+        else return RegexPatterns.ALL;
+    }
+
     public static Object generatePrimitiveData(PrimitiveSchema schema) {
         return switch (schema.getType()) {
             case STRING -> generateRandomString();
