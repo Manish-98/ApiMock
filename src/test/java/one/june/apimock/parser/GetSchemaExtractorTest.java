@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import one.june.apimock.model.HttpMethod;
@@ -12,6 +13,7 @@ import one.june.apimock.model.MockRequest;
 import one.june.apimock.model.schema.PrimitiveSchema;
 import one.june.apimock.model.Type;
 import one.june.apimock.model.token.DataToken;
+import one.june.apimock.model.token.RegexToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -66,6 +68,32 @@ class GetSchemaExtractorTest {
         MockRequest mockRequest = schemaExtractor.extract(path, pathItem);
 
         MockRequest expected = new MockRequest("/segment1/segment2", HttpMethod.GET, List.of(new DataToken("segment1"), new DataToken("segment2")), Map.of("200", new PrimitiveSchema(Type.STRING)), "200");
+        Assertions.assertEquals(expected, mockRequest);
+    }
+
+    @Test
+    void shouldReturnMockRequestForGivenGetRequestWithPathParameters() {
+        GetSchemaExtractor schemaExtractor = new GetSchemaExtractor();
+        String path = "/segment1/{id}";
+        PathItem pathItem = new PathItem();
+        Operation operation = new Operation();
+        ApiResponses responses = new ApiResponses();
+        ApiResponse apiResponse = new ApiResponse();
+        Content content = new Content();
+        MediaType type = new MediaType();
+        type.setSchema(new StringSchema());
+        content.put("application/json", type);
+        apiResponse.setContent(content);
+        responses.addApiResponse("200", apiResponse);
+        operation.setResponses(responses);
+        operation.setParameters(List.of(
+                new Parameter().in("path").name("id").schema(new StringSchema())
+        ));
+        pathItem.setGet(operation);
+
+        MockRequest mockRequest = schemaExtractor.extract(path, pathItem);
+
+        MockRequest expected = new MockRequest("/segment1/{id}", HttpMethod.GET, List.of(new DataToken("segment1"), new RegexToken("[a-zA-Z0-9]+")), Map.of("200", new PrimitiveSchema(Type.STRING)), "200");
         Assertions.assertEquals(expected, mockRequest);
     }
 }
