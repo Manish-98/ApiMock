@@ -50,7 +50,8 @@ public class MockRequest {
 
     public boolean matches(String requestPath) {
         String[] segments = requestPath.substring(1).split("/");
-        log.info("Segments: {}, {}", segments.length, segments);
+        if (segments.length != tokenCount) return false;
+
         for (int index = 0; index < segments.length; index++) {
             if (!tokens.get(index).matches(segments[index])) return false;
         }
