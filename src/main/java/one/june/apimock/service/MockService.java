@@ -8,7 +8,7 @@ import one.june.apimock.generator.JsonGenerator;
 import one.june.apimock.model.HttpMethod;
 import one.june.apimock.model.MockRequest;
 import one.june.apimock.model.ResponseMappingRequest;
-import one.june.apimock.model.Schema;
+import one.june.apimock.model.schema.Schema;
 import one.june.apimock.parser.OpenApiParser;
 import one.june.apimock.repository.MockRequestRepository;
 import org.apache.commons.lang3.tuple.Pair;
@@ -59,7 +59,8 @@ public class MockService {
 
     public Pair<String, JsonNode> mockGet(String path) throws MockNotFoundException {
         log.info("Mocking GET request for {}", path);
-        MockRequest mockRequest = mockRequestRepository.findByHttpMethodAndPath(HttpMethod.GET, path)
+        List<MockRequest> mocks = mockRequestRepository.findByHttpMethodAndTokenCount(HttpMethod.GET, path.substring(1).split("/").length);
+        MockRequest mockRequest = mocks.stream().filter( mock -> mock.matches(path)).findFirst()
                 .orElseThrow(MockNotFoundException::new);
         Schema schema = mockRequest.getResponseCodeSchemas().get(mockRequest.getSelectedResponseCode());
 

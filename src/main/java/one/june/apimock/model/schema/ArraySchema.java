@@ -1,4 +1,4 @@
-package one.june.apimock.model;
+package one.june.apimock.model.schema;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

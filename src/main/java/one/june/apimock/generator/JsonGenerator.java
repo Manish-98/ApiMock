@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.AllArgsConstructor;
-import one.june.apimock.model.ArraySchema;
-import one.june.apimock.model.ObjectSchema;
-import one.june.apimock.model.PrimitiveSchema;
-import one.june.apimock.model.Schema;
+import one.june.apimock.model.schema.ArraySchema;
+import one.june.apimock.model.schema.ObjectSchema;
+import one.june.apimock.model.schema.PrimitiveSchema;
+import one.june.apimock.model.schema.Schema;
 import one.june.apimock.utils.SchemaUtils;
 import org.springframework.stereotype.Component;
 

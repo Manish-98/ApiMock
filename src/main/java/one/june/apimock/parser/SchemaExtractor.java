@@ -7,10 +7,14 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import one.june.apimock.model.MockRequest;
-import one.june.apimock.model.PrimitiveSchema;
-import one.june.apimock.model.Schema;
+import one.june.apimock.model.schema.PrimitiveSchema;
+import one.june.apimock.model.schema.Schema;
 import one.june.apimock.model.Type;
+import one.june.apimock.model.token.DataToken;
+import one.june.apimock.model.token.RegexToken;
+import one.june.apimock.model.token.Token;
 import one.june.apimock.utils.SchemaUtils;
+import one.june.apimock.utils.Utilities;
 import org.springframework.data.util.Pair;
 
 import java.util.Arrays;
@@ -39,19 +43,18 @@ public abstract class SchemaExtractor {
         return responseCodeSchemas;
     }
 
-    protected static List<String> getTokens(String path, Operation operation) {
-        List<Parameter> parameters = operation.getParameters();
-        if (parameters == null) return List.of();
+    protected static List<Token> getTokens(String path, Operation operation) {
+        List<Parameter> parameters = Utilities.getOrDefault(operation.getParameters(), List.of());
 
-        Map<String, String> pathPattern = parameters.stream()
+        Map<String, Token> pathPattern = parameters.stream()
                 .filter(parameter -> Objects.equals(parameter.getIn(), "path"))
-                .map(parameter -> Pair.of(parameter.getName(), SchemaUtils.patternFrom(parameter.getSchema())))
+                .map(parameter -> Pair.of(parameter.getName(), new RegexToken(SchemaUtils.patternFrom(parameter.getSchema()))))
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
         String[] tokens = path.substring(1).split("/");
         return Arrays.stream(tokens).map(token -> {
             if (Pattern.matches(PATH_PARAMETER_PATTERN, token)) return pathPattern.get(token.substring(1, token.length() - 1));
-            else return token;
+            else return new DataToken(token);
         }).toList();
     }
 

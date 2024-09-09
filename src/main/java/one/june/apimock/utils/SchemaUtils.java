@@ -7,8 +7,8 @@ import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.media.UUIDSchema;
-import one.june.apimock.model.PrimitiveSchema;
-import one.june.apimock.model.Schema;
+import one.june.apimock.model.schema.PrimitiveSchema;
+import one.june.apimock.model.schema.Schema;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -38,10 +38,10 @@ public class SchemaUtils {
         } else if (inputSchema instanceof ObjectSchema objectSchema) {
             HashMap<String, Schema> props = new HashMap<>();
             objectSchema.getProperties().forEach((name, schema) -> props.put(name, from(schema)));
-            return new one.june.apimock.model.ObjectSchema(props);
+            return new one.june.apimock.model.schema.ObjectSchema(props);
         } else if (inputSchema instanceof ArraySchema arraySchema) {
             Schema itemsSchema = from(arraySchema.getItems());
-            return new one.june.apimock.model.ArraySchema(itemsSchema);
+            return new one.june.apimock.model.schema.ArraySchema(itemsSchema);
         }
 
         return new PrimitiveSchema(NULL);

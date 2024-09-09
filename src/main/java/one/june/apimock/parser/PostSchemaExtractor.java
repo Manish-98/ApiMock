@@ -5,7 +5,8 @@ import io.swagger.v3.oas.models.PathItem;
 import lombok.extern.slf4j.Slf4j;
 import one.june.apimock.model.HttpMethod;
 import one.june.apimock.model.MockRequest;
-import one.june.apimock.model.Schema;
+import one.june.apimock.model.schema.Schema;
+import one.june.apimock.model.token.Token;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ public class PostSchemaExtractor extends SchemaExtractor {
         Operation operation = pathItem.getPost();
         if (operation == null) return null;
 
-        List<String> pathTokens = getTokens(path, operation);
+        List<Token> pathTokens = getTokens(path, operation);
         HashMap<String, Schema> responseCodeSchemas = getSchema(operation);
         Optional<String> responseCode = responseCodeSchemas.keySet().stream().findFirst();
 
